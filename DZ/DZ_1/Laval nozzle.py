@@ -122,25 +122,27 @@ def soplo_lav():
         return g_gdf(x) - gdf_g[0]
 
     lam[0] = float(fsolve(f_g_gdf_0, 0))
-    print(lam[0])
+    print('Приведённая скорость 1 = ',lam[0])
 
     def f_g_gdf_1(x):
         return g_gdf(x) - gdf_g[1]
 
     lam[1] = float(fsolve(f_g_gdf_1, 0))
-    print(lam[1])
+    print('Приведённая скорость 2 = ',lam[1])
 
     def f_g_gdf_3(x):
         return g_gdf(x) - gdf_g[3]
 
     lam[3] = float(fsolve(f_g_gdf_3, 1.9))
-    print(lam[3])
+    print('Приведённая скорость 3 = ', lam[2])
+    print('Приведённая скорость 4 = ',lam[3])
 
     def f_g_gdf_4(x):
         return g_gdf(x) - gdf_g[4]
 
     lam[4] = float(fsolve(f_g_gdf_4, 1.9))
-    print(lam[4])
+    print('Приведённая скорость 5 = ', lam[4])
+    print('Приведённая скорость 6 =', lam[5])
 
 
     # Оставшиеся параметры
@@ -162,7 +164,7 @@ def soplo_lav():
         r[i] = float('{:.2f}'.format(r[i]))
         d[i] = float('{:.4f}'.format(d[i]))
 
-    print('a кр = ', a_kr)
+    print(f'a кр = {a_kr}  м/с')
     print('Ламбда = ', lam)
     print('p =  ', p, 'Па')
     print('a =  ', a, 'м/с')
@@ -173,7 +175,8 @@ def soplo_lav():
     print('d = ', d, 'м')
 
     print('_____Длина сопла_______')
-    print('Длина дозвуковой части = ', l1, 'Длина сверхзвуковой части = ', l2)
+    print('Длина дозвуковой части = ', l1)
+    print('Длина сверхзвуковой части =', l2)
     print('Общая длина = ', l1 + l2)
 
     #  Графики
@@ -196,3 +199,35 @@ def soplo_lav():
 
 p_0 = p_alt(h)
 pp, lamb = soplo_lav()
+
+
+def shock_wave(p_2=101325):
+
+    print(f'Давление за соплом на уровне земли = {p_2} Па')
+
+    #  Пусть скачок в 6-м сечении (на среде сопла)
+
+    lam_za_sk = 1 / lamb[5]  # Приведённая скорость за скачок
+    print(f'Приведённая скорость за скачком, если он в 6 сечении {lam_za_sk}')
+    print(g_gdf(lamb[5]))
+    p_t_za_sk = p_t * g_gdf(lamb[5]) / g_gdf(lam_za_sk)
+    p_za_sk_6 = p_t_za_sk * pi_gdf(lam_za_sk)
+    print('прив ск за скачком = ', lam_za_sk)
+    print('давл торм за СК =', p_t_za_sk)
+    print('давление за скачком = ', p_za_sk_6)
+    if p_za_sk_6 >= p_2:
+        print('Давление за скачком выше, скачок уплотнения будет на срезе сопла')
+    else:
+        print('Скачок в сопле')
+        find_shock()
+
+
+def find_shock():
+    print('Поиск скачка уплотнения...')
+    lam_var = np.arange(1, lamb[5], 0.05)
+    print(lam_var)
+    lam_za_sk_var = 1 / lam_var
+
+
+
+shock_wave()
