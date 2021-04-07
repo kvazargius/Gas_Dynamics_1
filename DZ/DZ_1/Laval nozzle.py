@@ -37,6 +37,10 @@ M = [0,0,0,0,0,0]
 gdf_g = [0,0,0,0,0,0]
 
 
+def mm(kk,rr):
+    return (2 * kk / (kk + 1)) ** 0.5 * (2 / (kk + 1)) ** (1 / (kk - 1)) / (rr) ** 0.5
+
+
 def p_alt(h):
     return 101325 * (1 - ((0.0065 / 288.15) * h)) ** (9.80665 / (0.0065 * 287.053))
 
@@ -194,12 +198,12 @@ def soplo_lav():
 
     plt.show()
 
-    return p, lam
+    return p, lam, S[5]
 
 
 p_0 = p_alt(h)
-pp, lamb = soplo_lav()
-
+pp, lamb, F5 = soplo_lav()
+p_2 = 101325
 
 def shock_wave(p_2=101325):
 
@@ -219,15 +223,96 @@ def shock_wave(p_2=101325):
         print('Давление за скачком выше, скачок уплотнения будет на срезе сопла')
     else:
         print('Скачок в сопле')
-        find_shock()
+        lam_var1, p_6_posle_ck1 = find_shock()
+        return lam_var1, p_6_posle_ck1
+
+
 
 
 def find_shock():
     print('Поиск скачка уплотнения...')
-    lam_var = np.arange(1, lamb[5], 0.05)
-    print(lam_var)
+    lam_var = np.arange(1, lamb[5], 0.01)
+
     lam_za_sk_var = 1 / lam_var
+    p_za_sk_var = p_t * g_gdf(lam_var) / g_gdf(lam_za_sk_var)  #  давление за скачком уплотнения в сопле
+
+    f_var = G * np.sqrt(T_t) / (mm(k,R) * p_t * g_gdf(lam_var))
+    d_var = np.sqrt(4 * f_var / pi)
+
+    g_gdf_var_za_ck = f_var * g_gdf(lam_za_sk_var) / F5
+
+    lam_6_posle_ck = []
+
+    ### определение приведённой скорости через ГДФ Расхода
+    for i in range(len(g_gdf_var_za_ck)):
+        gdf_number = g_gdf_var_za_ck[i]
+        def ff_gg(x):
+            return g_gdf(x) - gdf_number
+        lam_6_posle_ck.append(float(fsolve(ff_gg, 0)))
 
 
 
-shock_wave()
+    lam_6_posle_ck = np.array(lam_6_posle_ck)
+
+    p_6_posle_ck = p_za_sk_var * pi_gdf(lam_6_posle_ck)
+
+
+    plt.grid()  # включение отображение сетки
+    plt.xlabel("Приведённая скорость")  # ось абсцисс
+    plt.ylabel("Давление, Па ")  # ось ординат
+
+    #plt.vlines(3, V[0], V[5], color='r')  # Вертикальные линии
+    plt.axhline(y=101325, xmin=0, xmax=2, label='Атмосфера')
+    plt.plot(lam_var, p_6_posle_ck, 'r--', label='Давление на срезе сопла')
+    #plt.plot(x, V, 'g', label='скорость V')
+    plt.legend()
+
+    #plt.show()
+
+
+    return lam_var, p_6_posle_ck
+
+def find_intersection(t, curve1, curve2):
+    '''
+    Функция нахождения пересечения графиков
+    :return: точка пересечения двух графиков
+    '''
+    intersections = []
+    prev_dif = 0
+    t0, prev_1, prev_2 = None, None, None
+
+    for t1, c1, c2 in zip(t, curve1, curve2):
+        new_dif = c2 - c1
+        print(c1, c2)
+        if np.abs(new_dif) < 0.00001:
+            intersections.append((t1, c1))
+        elif new_dif * prev_dif < 0:
+            denom = prev_dif - new_dif
+            intersections.append(((-new_dif * t0 + prev_dif * t1) / denom, (c1 * prev_c2 - c2 * prev_c1) / denom))
+            print('оппа!')
+            print('new_dif =', new_dif)
+            print('prev_dif =', prev_dif)
+            print('denom = ', denom)
+            print(t0, t1)
+            print(c1, c2)
+
+        t0, prev_c1, prev_c2, prev_dif = t1, c1, c2, new_dif
+
+    print('Вроде нашли, но это не точно!!!')
+    print(intersections)
+
+
+lam_var_2, p_6_posle_ck_2 = shock_wave()
+p_2_massive = []
+for i in range(len(lam_var_2)):
+    p_2_massive.append(p_2)
+
+
+print('Последние значения ')
+print(lam_var_2)
+print(p_6_posle_ck_2)
+
+find_intersection(lam_var_2, p_6_posle_ck_2, p_2_massive)
+
+
+plt.show()
