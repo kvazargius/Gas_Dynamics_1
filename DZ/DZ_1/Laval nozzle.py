@@ -267,7 +267,7 @@ def find_shock():
     #plt.plot(x, V, 'g', label='скорость V')
     plt.legend()
 
-    #plt.show()
+    plt.show()
 
 
     return lam_var, p_6_posle_ck
@@ -298,8 +298,31 @@ def find_intersection(t, curve1, curve2):
 
         t0, prev_c1, prev_c2, prev_dif = t1, c1, c2, new_dif
 
-    print('Вроде нашли, но это не точно!!!')
-    print(intersections)
+    #print('Вроде нашли, но это не точно!!!')
+    #print(intersections)
+
+    return intersections
+
+def find_geom_shock(L):
+    '''
+    Нахождение координаты X скачка и Диаметра, где происходит скачок
+    :return: x
+    '''
+
+    x = np.arange(0, L, 0.02)
+
+    pass
+
+
+
+def draw_geometry():
+    '''
+    Рисуем геометрию спрофилированного сопла
+    :return: рисунок
+    '''
+    
+
+    pass
 
 
 lam_var_2, p_6_posle_ck_2 = shock_wave()
@@ -312,7 +335,7 @@ print('Последние значения ')
 print(lam_var_2)
 print(p_6_posle_ck_2)
 
-find_intersection(lam_var_2, p_6_posle_ck_2, p_2_massive)
+intersection_find = find_intersection(lam_var_2, p_6_posle_ck_2, p_2_massive)
+print(intersection_find)
 
 
-plt.show()
