@@ -302,6 +302,9 @@ def find_geom_shock(r_kr, len_sopl):
     lam_sk = intersection_find[0][0]
     print(r_kr, lam_sk)
     print('длина сопла', len_sopl)
+    f_chok = G * np.sqrt(T_t) / (mm(k, R) * p_t * g_gdf(lam_sk))
+    r_chok = np.sqrt(4 * f_chok / pi)
+    print(r_chok)
 
 
 
@@ -349,13 +352,54 @@ def draw_geometry(alfa_, r_kr, r_6):
     ax1.plot(x, y, 'r-', x1, y1, 'b-', x2, y2, 'g-', x_l, y_l, 'g-')
     ax1.set_xlim(0, xlim)
     ax2.set_xlim(0, xlim)
+    ax1.grid(True)
     #ax1.set_ylim(0, max_y_lim_graf * 1.1)
-    ax1.axis('equal')
+    #ax1.axis('equal')
 
-    plt.tight_layout(h_pad=-2.2)
+    #Расчёт для второй оси
+    f_1 = pi * (y/1000) ** 2 / 2
+    f_2 = pi * (y1/1000) ** 2 / 2
+    q_qdf_1 = G * np.sqrt(T_t) / (mm(k, R) * p_t * f_1)
+    q_qdf_2 = G * np.sqrt(T_t) / (mm(k, R) * p_t * f_2)
 
-    for ax in fig.axes:
-        ax.grid(True)
+
+    lam_1 = []
+    lam_2 = []
+    x2_for_lam_2 = []
+
+    ### определение приведённой скорости через ГДФ Расхода
+    for i in range(len(q_qdf_1)):
+        gdf_number = q_qdf_1[i]
+
+        def ff_gg(x):
+            return g_gdf(x) - gdf_number
+
+        lam_1.append(float(fsolve(ff_gg, 0)))
+
+    lam_1 = np.array(lam_1)
+
+    lam_2.append(lam_1[-1])
+    x2_for_lam_2.append(x[-1])
+
+    for i in range(len(q_qdf_2)):
+        gdf_number = q_qdf_2[i]
+
+        def ff_gg(x):
+            return g_gdf(x) - gdf_number
+
+        lam_2.append(float(fsolve(ff_gg, 0)))
+
+    lam_2 = np.array(lam_2)
+
+
+
+
+
+
+    ax2.plot(x, lam_1, 'r-', x1, lam_2, 'g-')
+
+    #plt.tight_layout(h_pad=-2.2)
+
 
 
     plt.show()
@@ -377,7 +421,7 @@ for i in range(len(lam_var_2)):
 print('Последние значения ')
 
 intersection_find = find_intersection(lam_var_2, p_6_posle_ck_2, p_2_massive)
-print(intersection_find)
+print('найденное пересечение', intersection_find)
 
 
 draw_geometry(alfa_g, d_kr / 2, d_5 / 2)
