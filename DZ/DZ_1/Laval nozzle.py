@@ -315,7 +315,8 @@ def draw_geometry(alfa_, r_kr, r_6):
     Рисуем геометрию спрофилированного сопла
     :return: рисунок
     '''
-
+    r_kr = r_kr * 1000
+    r_6 = r_6 * 1000
     al_rad = pi / 180  #  коэффициент пересчёта
     # перебор углов
     alfa = np.arange(0, 60, 0.1)
@@ -334,7 +335,7 @@ def draw_geometry(alfa_, r_kr, r_6):
     y2 = 2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad)
     #plt.figure(figsize=(14, 14))
 
-    fig = plt.figure(figsize=(10, 10))
+    fig = plt.figure()
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
 
@@ -342,12 +343,13 @@ def draw_geometry(alfa_, r_kr, r_6):
         max_y_lim_graf = 2 * r_kr
     else:
         max_y_lim_graf = r_6
-
+    xlim = x2 + stop
     ax1.tick_params(axis='x', labelbottom='off', labeltop='off')
     ax2.tick_params(axis='y', labelleft='off', labelright='on', left=False, right=True)
     ax1.plot(x, y, 'r-', x1, y1, 'b-', x2, y2, 'g-', x_l, y_l, 'g-')
-    ax1.set_xlim(0, x2 + stop)
-    ax1.set_ylim(0, max_y_lim_graf * 1.1)
+    ax1.set_xlim(0, xlim)
+    ax2.set_xlim(0, xlim)
+    #ax1.set_ylim(0, max_y_lim_graf * 1.1)
     ax1.axis('equal')
 
     plt.tight_layout(h_pad=-2.2)
