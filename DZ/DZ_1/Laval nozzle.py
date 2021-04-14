@@ -380,23 +380,12 @@ def draw_geometry(alfa_, r_kr, r_6):
 
     lam_2.append(lam_1[-1])
     x2_for_lam_2.append(x[-1])
-
-    for i in range(len(q_qdf_2)):
-        gdf_number = q_qdf_2[i]
-
-        def ff_gg(x):
-            return g_gdf(x) - gdf_number
-
-        lam_2.append(float(fsolve(ff_gg, 0)))
-
-    lam_2 = np.array(lam_2)
+    x2_for_lam_2.append(2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61) * al_rad))
+    lam_2.append(1)
 
 
 
-
-
-
-    ax2.plot(x, lam_1, 'r-', x1, lam_2, 'g-')
+    ax2.plot(x, lam_1, 'r-', x2_for_lam_2, lam_2, 'g-')
 
     #plt.tight_layout(h_pad=-2.2)
 
