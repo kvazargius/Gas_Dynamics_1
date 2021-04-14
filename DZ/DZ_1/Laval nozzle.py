@@ -11,7 +11,7 @@ from scipy.optimize import fsolve
 G = float(input('Расход, кг/с = '))
 T_t = float(input('Температура торможения, К = '))
 p_t = float(input('Давление торможения, Па = '))
-alfa_g = float(input('угол полураскрытия диффузора (alfa/2 ), град = '))
+alfa_g = float(input('Половина угол раскрытия диффузора (alfa/2 ), град = '))
 R = float(input('Газовая постоянная, Дж / (кг*К) = '))
 k = float(input('Показатель адиабаты = '))
 h = float(input('Высота полёта, км = ')) * 1000
@@ -198,11 +198,11 @@ def soplo_lav():
 
     plt.show()
 
-    return p, lam, S[5]
+    return p, lam, S[5], d[2], d[5]
 
 
 p_0 = p_alt(h)
-pp, lamb, F5 = soplo_lav()
+pp, lamb, F5, d_kr, d_5 = soplo_lav()
 p_2 = 101325
 
 def shock_wave(p_2=101325):
@@ -315,14 +315,43 @@ def find_geom_shock(L):
 
 
 
-def draw_geometry():
+def draw_geometry(alfa_, r_kr, r_6):
     '''
     Рисуем геометрию спрофилированного сопла
     :return: рисунок
     '''
-    
 
-    pass
+    al_rad = pi / 180  #  коэффициент пересчёта
+    # перебор углов
+    alfa = np.arange(0, 60, 0.1)
+    start = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
+    stop = (r_6 - (2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad))) / np.tan(alfa_ * al_rad)
+    beta = 150 - np.arange(0, 61 + alfa_, 0.1)
+
+    # Сверхзвуковая часть
+    x_l = np.linspace(start, stop, 2)
+    y_l = [2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad), r_6]
+    x = r_kr * np.sin(alfa * al_rad)
+    y = r_kr + r_kr * np.cos(alfa * al_rad)
+    x1 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos(beta * al_rad)
+    y1 = 2 * r_kr - r_kr * np.sin(beta * al_rad)
+    x2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
+    y2 = 2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad)
+    plt.figure(figsize=(14, 14))
+    plt.plot(x, y, 'r-', x1, y1, 'b-', x2, y2, 'g-')
+    plt.plot(x_l, y_l, 'g-')
+    if 2 * r_kr  >= r_6:
+        max_y_lim_graf = 2 * r_kr
+    else:
+        max_y_lim_graf = r_6
+    plt.xlim(0, x2 + stop)
+    plt.ylim(0, max_y_lim_graf * 1.1)
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.grid(True)
+    plt.show()
+
+
+draw_geometry(alfa_g, d_kr / 2, d_5 / 2)
 
 
 lam_var_2, p_6_posle_ck_2 = shock_wave()
@@ -337,5 +366,6 @@ print(p_6_posle_ck_2)
 
 intersection_find = find_intersection(lam_var_2, p_6_posle_ck_2, p_2_massive)
 print(intersection_find)
+
 
 
