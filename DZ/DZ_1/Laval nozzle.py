@@ -201,10 +201,6 @@ def soplo_lav():
     return p, lam, S[5], d[2], d[5]
 
 
-p_0 = p_alt(h)
-pp, lamb, F5, d_kr, d_5 = soplo_lav()
-p_2 = 101325
-
 def shock_wave(p_2=101325):
 
     print(f'Давление за соплом на уровне земли = {p_2} Па')
@@ -225,8 +221,6 @@ def shock_wave(p_2=101325):
         print('Скачок в сопле')
         lam_var1, p_6_posle_ck1 = find_shock()
         return lam_var1, p_6_posle_ck1
-
-
 
 
 def find_shock():
@@ -272,6 +266,7 @@ def find_shock():
 
     return lam_var, p_6_posle_ck
 
+
 def find_intersection(t, curve1, curve2):
     '''
     Функция нахождения пересечения графиков
@@ -283,18 +278,13 @@ def find_intersection(t, curve1, curve2):
 
     for t1, c1, c2 in zip(t, curve1, curve2):
         new_dif = c2 - c1
-        print(c1, c2)
+
         if np.abs(new_dif) < 0.00001:
             intersections.append((t1, c1))
         elif new_dif * prev_dif < 0:
             denom = prev_dif - new_dif
             intersections.append(((-new_dif * t0 + prev_dif * t1) / denom, (c1 * prev_c2 - c2 * prev_c1) / denom))
-            print('оппа!')
-            print('new_dif =', new_dif)
-            print('prev_dif =', prev_dif)
-            print('denom = ', denom)
-            print(t0, t1)
-            print(c1, c2)
+
 
         t0, prev_c1, prev_c2, prev_dif = t1, c1, c2, new_dif
 
@@ -302,6 +292,7 @@ def find_intersection(t, curve1, curve2):
     #print(intersections)
 
     return intersections
+
 
 def find_geom_shock(L):
     '''
@@ -312,7 +303,6 @@ def find_geom_shock(L):
     x = np.arange(0, L, 0.02)
 
     pass
-
 
 
 def draw_geometry(alfa_, r_kr, r_6):
@@ -351,21 +341,21 @@ def draw_geometry(alfa_, r_kr, r_6):
     plt.show()
 
 
-draw_geometry(alfa_g, d_kr / 2, d_5 / 2)
-
+p_0 = p_alt(h)
+pp, lamb, F5, d_kr, d_5 = soplo_lav()
+p_2 = 101325
 
 lam_var_2, p_6_posle_ck_2 = shock_wave()
+
 p_2_massive = []
 for i in range(len(lam_var_2)):
     p_2_massive.append(p_2)
 
-
 print('Последние значения ')
-print(lam_var_2)
-print(p_6_posle_ck_2)
+
 
 intersection_find = find_intersection(lam_var_2, p_6_posle_ck_2, p_2_massive)
 print(intersection_find)
 
-
+draw_geometry(alfa_g, d_kr / 2, d_5 / 2)
 
