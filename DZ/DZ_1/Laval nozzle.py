@@ -294,13 +294,18 @@ def find_intersection(t, curve1, curve2):
     return intersections
 
 
-def find_geom_shock(L):
+def find_geom_shock(r_kr, len_sopl):
     '''
     Нахождение координаты X скачка и Диаметра, где происходит скачок
     :return: x
     '''
+    lam_sk = intersection_find[0][0]
+    print(r_kr, lam_sk)
+    print('длина сопла', len_sopl)
 
-    x = np.arange(0, L, 0.02)
+
+
+
 
     pass
 
@@ -327,18 +332,34 @@ def draw_geometry(alfa_, r_kr, r_6):
     y1 = 2 * r_kr - r_kr * np.sin(beta * al_rad)
     x2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
     y2 = 2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad)
-    plt.figure(figsize=(14, 14))
-    plt.plot(x, y, 'r-', x1, y1, 'b-', x2, y2, 'g-')
-    plt.plot(x_l, y_l, 'g-')
+    #plt.figure(figsize=(14, 14))
+
+    fig = plt.figure(figsize=(10, 10))
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+
     if 2 * r_kr  >= r_6:
         max_y_lim_graf = 2 * r_kr
     else:
         max_y_lim_graf = r_6
-    plt.xlim(0, x2 + stop)
-    plt.ylim(0, max_y_lim_graf * 1.1)
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.grid(True)
+
+    ax1.tick_params(axis='x', labelbottom='off', labeltop='off')
+    ax2.tick_params(axis='y', labelleft='off', labelright='on', left=False, right=True)
+    ax1.plot(x, y, 'r-', x1, y1, 'b-', x2, y2, 'g-', x_l, y_l, 'g-')
+    ax1.set_xlim(0, x2 + stop)
+    ax1.set_ylim(0, max_y_lim_graf * 1.1)
+    ax1.axis('equal')
+
+    plt.tight_layout(h_pad=-2.2)
+
+    for ax in fig.axes:
+        ax.grid(True)
+
+
     plt.show()
+
+    find_geom_shock(r_kr, stop)
+
 
 
 p_0 = p_alt(h)
@@ -353,9 +374,9 @@ for i in range(len(lam_var_2)):
 
 print('Последние значения ')
 
-
 intersection_find = find_intersection(lam_var_2, p_6_posle_ck_2, p_2_massive)
 print(intersection_find)
+
 
 draw_geometry(alfa_g, d_kr / 2, d_5 / 2)
 
