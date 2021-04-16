@@ -15,7 +15,7 @@ alfa_g = float(input('Половина угол раскрытия диффуз�
 R = float(input('Газовая постоянная, Дж / (кг*К) = '))
 k = float(input('Показатель адиабаты = '))
 h = float(input('Высота полёта, км = ')) * 1000
-p_0 = float(input(f'Давление на высоте {h} км в Па ='))
+p_0 = float(input(f'Давление на высоте {h} км в Па = '))
 
 pi = np.pi
 
@@ -326,6 +326,8 @@ def draw_geometry(alfa_, r_kr, r_6):
     start = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
     stop = (r_6 - (2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad))) / np.tan(alfa_ * al_rad)
     beta = 150 - np.arange(0, 61 + alfa_, 0.1)
+    beta_1 = 150 - np.arange(0, 15, 1)
+    beta_2 = 150 - np.arange(61, 61 + alfa_, 0.1)
 
     # Сверхзвуковая часть
     x_l = np.linspace(start, stop, 2)
@@ -334,8 +336,12 @@ def draw_geometry(alfa_, r_kr, r_6):
     y = r_kr + r_kr * np.cos(alfa * al_rad)
     x1 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos(beta * al_rad)
     y1 = 2 * r_kr - r_kr * np.sin(beta * al_rad)
+    x1_1 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos(beta_1 * al_rad)
+    y1_1 = 2 * r_kr - r_kr * np.sin(beta_1 * al_rad)
     x2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
     y2 = 2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad)
+    x2_2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
+    y2_2 = 2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad)
     #plt.figure(figsize=(14, 14))
 
     fig = plt.figure()
@@ -358,7 +364,7 @@ def draw_geometry(alfa_, r_kr, r_6):
 
     #Расчёт для второй оси
     f_1 = pi * (y/1000) ** 2 / 2
-    f_2 = pi * (y1/1000) ** 2 / 2
+    f_2 = pi * (y1_1/1000) ** 2 / 2
     q_qdf_1 = G * np.sqrt(T_t) / (mm(k, R) * p_t * f_1)
     q_qdf_2 = G * np.sqrt(T_t) / (mm(k, R) * p_t * f_2)
 
@@ -376,16 +382,38 @@ def draw_geometry(alfa_, r_kr, r_6):
 
         lam_1.append(float(fsolve(ff_gg, 0)))
 
-    lam_1 = np.array(lam_1)
 
+
+    '''
     lam_2.append(lam_1[-1])
     x2_for_lam_2.append(x[-1])
     x2_for_lam_2.append(2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61) * al_rad))
     lam_2.append(1)
+    '''
+
+    for i in range(len(q_qdf_2)):
+        gdf_number = q_qdf_2[i]
+
+        def ff_gg(x):
+            return g_gdf(x) - gdf_number
+
+        lam_2.append(float(fsolve(ff_gg, 0)))
+
+    print(len(x1_1), len(lam_2))
+    print(x1_1)
+    plus = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61) * al_rad)
+    x1_1 = np.append(x1_1, plus)
+    #x1_1.append(2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61) * al_rad))
+    lam_2.append(1)
+    print(x1_1)
+    print(2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61) * al_rad))
 
 
+    lam_1 = np.array(lam_1)
 
-    ax2.plot(x, lam_1, 'r-', x2_for_lam_2, lam_2, 'g-')
+    lam_2 = np.array(lam_2)
+    print(len(x1_1), len(lam_2))
+    ax2.plot(x, lam_1, 'r-', x1_1, lam_2, 'g-')
 
     #plt.tight_layout(h_pad=-2.2)
 
