@@ -313,6 +313,52 @@ def find_geom_shock(r_kr, len_sopl):
     pass
 
 
+def g_gdf_find_lam(gdf, lam):
+    '''
+    Возвращает разницу между ГДФ заданным и расчитанным при заданном лямба
+    Parameters
+    ----------
+    gdf : TYPE
+        Значение ГДФ расхода, по которому необходимо найти Приведённую скорость.
+    lam : TYPE
+        Обращение прив. скорости при переборе.
+
+    Returns
+    -------
+    TYPE
+        разница между ГДФ расхода.
+
+    '''
+    return g_gdf(lam) - gdf
+
+
+def find_lambda(gdf):
+    '''
+    Функция поиска приведённой скорости по известной ГДФ расхода
+    Возвращает значение приведённой скорости
+    '''
+    l_delta = 0.000001
+    lam_min = 0.4
+    lam_max = 1
+    finished = False
+    i = 0
+    while not finished:
+        if abs(lam_min - lam_max) < l_delta:
+            finished = True
+        ff_min = g_gdf_find_lam(gdf, lam_min)
+        ff_max = g_gdf_find_lam(gdf, lam_max)
+        lam_mean = (lam_min + lam_max) / 2
+        ff_mean = g_gdf_find_lam(gdf, lam_mean)
+
+        if ff_min * ff_mean < 0:
+            lam_max = lam_mean
+        else:
+            lam_min = lam_mean
+        i += 1
+
+    return lam_mean
+
+
 def draw_geometry(alfa_, r_kr, r_6):
     '''
     Рисуем геометрию спрофилированного сопла
@@ -326,12 +372,13 @@ def draw_geometry(alfa_, r_kr, r_6):
     start = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
     stop = (r_6 - (2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad))) / np.tan(alfa_ * al_rad)
     beta = 150 - np.arange(0, 61 + alfa_, 0.1)
-    beta_1 = 150 - np.arange(0, 15, 1)
+    beta_1 = 150 - np.arange(0, 60, 0.5)
     beta_2 = 150 - np.arange(61, 61 + alfa_, 0.1)
 
     # Сверхзвуковая часть
     x_l = np.linspace(start, stop, 2)
     y_l = [2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad), r_6]
+    # Дозвуковая часть
     x = r_kr * np.sin(alfa * al_rad)
     y = r_kr + r_kr * np.cos(alfa * al_rad)
     x1 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos(beta * al_rad)
@@ -382,15 +429,12 @@ def draw_geometry(alfa_, r_kr, r_6):
 
         lam_1.append(float(fsolve(ff_gg, 0)))
 
-
-
     '''
     lam_2.append(lam_1[-1])
     x2_for_lam_2.append(x[-1])
     x2_for_lam_2.append(2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61) * al_rad))
     lam_2.append(1)
-    '''
-
+    
     for i in range(len(q_qdf_2)):
         gdf_number = q_qdf_2[i]
 
@@ -407,6 +451,12 @@ def draw_geometry(alfa_, r_kr, r_6):
     lam_2.append(1)
     print(x1_1)
     print(2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61) * al_rad))
+
+    '''
+
+    for i in range(len(q_qdf_2)):
+        gdf_number2 = q_qdf_2[i]
+        lam_2.append(float(find_lambda(gdf_number2)))
 
 
     lam_1 = np.array(lam_1)
