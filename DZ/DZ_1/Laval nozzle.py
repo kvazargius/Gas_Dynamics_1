@@ -338,7 +338,7 @@ def find_lambda(gdf):
     Возвращает значение приведённой скорости
     '''
     l_delta = 0.000001
-    lam_min = 0.4
+    lam_min = 0
     lam_max = 1
     finished = False
     i = 0
@@ -369,11 +369,11 @@ def draw_geometry(alfa_, r_kr, r_6):
     al_rad = pi / 180  #  коэффициент пересчёта
     # перебор углов
     alfa = np.arange(0, 60, 0.1)
-    start = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
-    stop = (r_6 - (2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad))) / np.tan(alfa_ * al_rad)
-    beta = 150 - np.arange(0, 61 + alfa_, 0.1)
-    beta_1 = 150 - np.arange(0, 60, 0.5)
-    beta_2 = 150 - np.arange(61, 61 + alfa_, 0.1)
+    start = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 60 - alfa_) * al_rad)
+    stop = (r_6 - (2 * r_kr - r_kr * np.sin((150 - 60 - alfa_) * al_rad))) / np.tan(alfa_ * al_rad)
+    beta = 150 - np.arange(0, 60 + alfa_, 0.1)
+    beta_1 = 150 - np.arange(0, 60, 0.1)
+    beta_2 = 150 - np.arange(60.1, 60 + alfa_, 0.1)
 
     # Сверхзвуковая часть
     x_l = np.linspace(start, stop, 2)
@@ -385,8 +385,12 @@ def draw_geometry(alfa_, r_kr, r_6):
     y1 = 2 * r_kr - r_kr * np.sin(beta * al_rad)
     x1_1 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos(beta_1 * al_rad)
     y1_1 = 2 * r_kr - r_kr * np.sin(beta_1 * al_rad)
-    x2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
-    y2 = 2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad)
+    x1_2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos(beta_2 * al_rad)
+    y1_2 = 2 * r_kr - r_kr * np.sin(beta_2 * al_rad)
+
+
+    x2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 60 - alfa_) * al_rad)
+    y2 = 2 * r_kr - r_kr * np.sin((150 - 60 - alfa_) * al_rad)
     x2_2 = 2 * r_kr * np.sin(60 * al_rad) + r_kr * np.cos((150 - 61 - alfa_) * al_rad)
     y2_2 = 2 * r_kr - r_kr * np.sin((150 - 61 - alfa_) * al_rad)
     #plt.figure(figsize=(14, 14))
@@ -412,12 +416,16 @@ def draw_geometry(alfa_, r_kr, r_6):
     #Расчёт для второй оси
     f_1 = pi * (y/1000) ** 2 / 2
     f_2 = pi * (y1_1/1000) ** 2 / 2
+    f_3 = pi * (y1_2 / 1000) ** 2 / 2
     q_qdf_1 = G * np.sqrt(T_t) / (mm(k, R) * p_t * f_1)
     q_qdf_2 = G * np.sqrt(T_t) / (mm(k, R) * p_t * f_2)
+    q_qdf_3 = G * np.sqrt(T_t) / (mm(k, R) * p_t * f_3)
+
 
 
     lam_1 = []
     lam_2 = []
+    lam_3 = []
     x2_for_lam_2 = []
 
     ### определение приведённой скорости через ГДФ Расхода
@@ -459,16 +467,63 @@ def draw_geometry(alfa_, r_kr, r_6):
         lam_2.append(float(find_lambda(gdf_number2)))
 
 
-    lam_1 = np.array(lam_1)
+    for i in range(len(q_qdf_3)):
+        gdf_number3 = q_qdf_3[i]
+        lam_3.append(float(find_lambda(gdf_number3)))
 
+
+    lam_1 = np.array(lam_1)
     lam_2 = np.array(lam_2)
+    lam_3 = np.array(lam_3)
+
     print(len(x1_1), len(lam_2))
-    ax2.plot(x, lam_1, 'r-', x1_1, lam_2, 'g-')
+
 
     #plt.tight_layout(h_pad=-2.2)
+    print('Пришло пересечение = ', intersection_find[0][0])
+    lam_sk = (intersection_find[0][0])
+
+    num_do_sk = 10
+    num_posle_sk = 10
+    lam_hi_speed = np.linspace(1, lam_sk, num_do_sk)
+    F_hi_speed = G * np.sqrt(T_t) / (mm(k,R) * p_t * g_gdf(lam_hi_speed))
+    r_hi_speed = np.sqrt(F_hi_speed / pi)
+    x_hi_speed = x2 + (r_hi_speed * 1000 - r_kr) / np.tan(alfa_ * al_rad)
+    print('x_hi_speed = ')
+    print(x_hi_speed)
+
+    lam_za_sk = 1 / lam_sk
+    p_t_za_sk = p_t * g_gdf(lam_sk) / g_gdf(lam_za_sk)
+
+    F_sk = G * np.sqrt(T_t) / (mm(k,R) * p_t * g_gdf(lam_sk))
+    F_6 = pi * (r_6 / 1000) ** 2
+    g_gdf_za_sk_6 = g_gdf(lam_za_sk) * F_sk / F_6
+    print('ГДФ расхода в 6 сечении при выходе из сопла = ', g_gdf_za_sk_6)
+    lam_6_za_sk = find_lambda(g_gdf_za_sk_6)
+
+    lam_slow_speed = np.linspace(lam_za_sk, lam_6_za_sk, 20)
+
+    F_slow_speed = G * np.sqrt(T_t) / (mm(k, R) * p_t_za_sk * g_gdf(lam_slow_speed))
+    r_slow_speed = np.sqrt(F_slow_speed / pi)
+    x_slow_speed = x2 + (r_slow_speed * 1000 - r_kr) / np.tan(alfa_ * al_rad)
+
+    print('lam_6_za_sk = ', lam_6_za_sk)
+    print('lam_slow_speed')
+    print(lam_slow_speed)
+    y_hi_speed = 1
 
 
+    P_sk_1 = p_t * pi_gdf(lam_1)
+    P_sk_2 = p_t * pi_gdf(lam_2)
+    P_sk_3 = p_t * pi_gdf(lam_3)
+    P_sk_4 = p_t * pi_gdf(lam_hi_speed)
+    P_sk_5_6 = p_t_za_sk * pi_gdf(lam_slow_speed)
+    print('x_slow_speed = ')
+    print(x_slow_speed)
+    print('P_sk_5_6')
+    print(P_sk_5_6)
 
+    ax2.plot(x, P_sk_1, 'r-', x1_1, P_sk_2, 'g-', x1_2, P_sk_3, 'm-', x_hi_speed, P_sk_4, 'g-', x_slow_speed, P_sk_5_6, 'r-')
     plt.show()
 
     find_geom_shock(r_kr, stop)
