@@ -523,7 +523,8 @@ def draw_geometry(alfa_, r_kr, r_6):
     print('P_sk_5_6')
     print(P_sk_5_6)
 
-    ax2.plot(x, P_sk_1, 'r-', x1_1, P_sk_2, 'g-', x1_2, P_sk_3, 'm-', x_hi_speed, P_sk_4, 'g-', x_slow_speed, P_sk_5_6, 'r-')
+    ax2.plot(x, P_sk_1, 'g-', x1_1, P_sk_2, 'g-', x1_2, P_sk_3, 'g-', x_hi_speed, P_sk_4, 'g-', x_slow_speed, P_sk_5_6, 'r-')
+    ax2.grid(True)
     plt.show()
 
     find_geom_shock(r_kr, stop)
